@@ -1,0 +1,30 @@
+{
+  "name": "mcp-azure-devops",
+  "version": "1.0.0",
+  "description": "MCP Server for Azure DevOps integration (Boards, Repos, Pipelines)",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc && node dist/server.js"
+  },
+  "keywords": [
+    "mcp",
+    "azure-devops",
+    "boards",
+    "repos",
+    "pipelines"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^16.4.7",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.19",
+    "@types/node-fetch": "^2.6.12",
+    "typescript": "^5.7.3"
+  }
+}
