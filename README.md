@@ -1,91 +1,59 @@
-# mcp-azure-devops
+# MCP Azure DevOps Server
 
-MCP Server para integração com **Azure DevOps** — expõe ferramentas para **Boards**, **Repos (Pull Requests)** e **Pipelines** via Model Context Protocol.
+Um servidor MCP (Model Context Protocol) para integração com o Azure DevOps, oferecendo acesso a Boards, Repos e Pipelines.
 
----
+## Ferramentas Disponíveis
 
-## 🚀 Pré-requisitos
+### 📋 Boards — Leitura
 
-| Requisito | Versão mínima |
-|-----------|---------------|
-| Node.js   | 20+           |
-| npm       | 9+            |
+| Ferramenta | Descrição |
+|---|---|
+| `getWorkItem` | Recupera um work item pelo ID, com opção de expandir relações (parent/child) |
+| `getWorkItemsBatch` | Recupera múltiplos work items por IDs em uma única requisição (até 200) |
+| `queryWorkItems` | Executa uma WIQL query, com opção de retornar dados completos (`fetchDetails`) |
+| `listWorkItemTypes` | Lista todos os tipos de work items e seus estados válidos no projeto |
 
-Você também precisa de um **Personal Access Token (PAT)** do Azure DevOps com permissões de leitura/escrita para Work Items, Code e Build.
+### 📋 Boards — Escrita
 
----
+| Ferramenta | Descrição |
+|---|---|
+| `createWorkItem` | Cria um work item (Epic, Feature, PBI, Task, Bug, Impediment) com campos completos e link de pai opcional |
+| `updateWorkItem` | Atualiza campos arbitrários de um work item (título, descrição, tags, state, prioridade, etc.) |
+| `updateWorkItemState` | Atalho para alterar apenas o estado de um work item |
+| `deleteWorkItem` | Deleta um work item (lixeira ou destruição permanente) |
+| `addWorkItemComment` | Adiciona um comentário a um work item |
 
-## 📦 Instalação
+### 🔀 Repos
 
-```bash
-git clone <repo-url> mcp-azure-devops
-cd mcp-azure-devops
-npm install
-npm run build
+| Ferramenta | Descrição |
+|---|---|
+| `createPullRequest` | Cria um Pull Request em um repositório do Azure DevOps |
+| `linkPullRequestToWorkItem` | Vincula um PR existente a um Work Item |
+
+### 🚀 Pipelines
+
+| Ferramenta | Descrição |
+|---|---|
+| `getPipelineStatus` | Obtém o status da última execução de um pipeline |
+
+## Configuração
+
+Variáveis de ambiente obrigatórias:
+
+```env
+AZURE_ORG=athosschrapett
+AZURE_PROJECT=Arenar
+AZURE_PAT=<seu-personal-access-token>
 ```
 
----
-
-## ⚙️ Configuração
-
-1. Copie o arquivo de exemplo:
-
-```bash
-cp .env.example .env
-```
-
-2. Preencha as variáveis no `.env`:
-
-```dotenv
-AZURE_ORG=sua-organizacao
-AZURE_PROJECT=seu-projeto
-AZURE_PAT=seu-personal-access-token
-```
-
-> **⚠️ Nunca versione o arquivo `.env`.** Ele já está listado no `.gitignore`.
-
-### Como gerar o PAT
-
-1. Acesse `https://dev.azure.com/{sua-org}/_usersSettings/tokens`
-2. Clique em **New Token**
-3. Selecione as permissões necessárias:
-   - **Work Items**: Read & Write
-   - **Code**: Read & Write
-   - **Build**: Read
-4. Copie o token gerado e cole em `AZURE_PAT`
-
----
-
-## ▶️ Uso
-
-### Executar diretamente
-
-```bash
-npm start
-```
-
-O servidor escuta em **stdio** (stdin/stdout) conforme o protocolo MCP.
-
-### Desenvolvimento
-
-```bash
-npm run dev
-```
-
-Compila e executa em um único comando.
-
----
-
-## 🔌 Registrar como MCP Server
-
-Adicione a seguinte entrada no arquivo de configuração do seu cliente MCP (ex: `claude_desktop_config.json`):
+## Uso via MCP Config
 
 ```json
 {
   "mcpServers": {
     "azure-devops": {
       "command": "node",
-      "args": ["caminho/para/mcp-azure-devops/dist/server.js"],
+      "args": ["path/to/dist/server.js"],
       "env": {
         "AZURE_ORG": "sua-organizacao",
         "AZURE_PROJECT": "seu-projeto",
@@ -96,55 +64,22 @@ Adicione a seguinte entrada no arquivo de configuração do seu cliente MCP (ex:
 }
 ```
 
-> Alternativamente, se as variáveis já estiverem definidas no `.env` do projeto, basta omitir o campo `env`.
+## Build
 
----
-
-## 🧰 Ferramentas Disponíveis
-
-### Boards
-
-| Ferramenta             | Descrição                                     |
-|------------------------|-----------------------------------------------|
-| `getWorkItem`          | Busca um work item pelo ID                    |
-| `queryWorkItems`       | Executa uma consulta WIQL                     |
-| `updateWorkItemState`  | Atualiza o estado de um work item             |
-| `addWorkItemComment`   | Adiciona um comentário a um work item         |
-
-### Repos
-
-| Ferramenta                   | Descrição                                       |
-|------------------------------|--------------------------------------------------|
-| `createPullRequest`          | Cria um Pull Request                             |
-| `linkPullRequestToWorkItem`  | Vincula um Pull Request a um Work Item           |
-
-### Pipelines
-
-| Ferramenta           | Descrição                                          |
-|----------------------|-----------------------------------------------------|
-| `getPipelineStatus`  | Retorna o status da execução mais recente do pipeline |
-
----
-
-## 🗂 Estrutura do Projeto
-
-```
-mcp-azure-devops/
-├── src/
-│   ├── server.ts              # Entrypoint MCP (registra tools, inicia stdio)
-│   ├── config.ts              # Carrega env vars + autenticação
-│   └── azure/
-│       ├── boards.ts          # Chamadas HTTP — Work Items
-│       ├── repos.ts           # Chamadas HTTP — Pull Requests
-│       └── pipelines.ts       # Chamadas HTTP — Pipelines
-├── package.json
-├── tsconfig.json
-├── .env.example
-└── README.md
+```bash
+npm install
+npm run build
 ```
 
----
+## Changelog
 
-## 📄 Licença
-
-MIT
+### v2.0.0
+- **Novo:** `createWorkItem` — cria work items com todos os campos (título, descrição, AC, tags, prioridade, story points, iteração, área, assignee, parent link)
+- **Novo:** `updateWorkItem` — atualiza campos arbitrários de um work item
+- **Novo:** `deleteWorkItem` — deleta work items (lixeira ou permanente)
+- **Novo:** `listWorkItemTypes` — lista tipos e estados válidos
+- **Novo:** `getWorkItemsBatch` — recupera múltiplos work items por IDs em batch
+- **Melhorado:** `queryWorkItems` — novo parâmetro `fetchDetails` para retornar dados completos
+- **Melhorado:** `getWorkItem` — novo parâmetro `expand` para ver relações/links
+- **Fix:** Config padrão atualizado para projeto `Arenar`
+- **Fix:** Uso de org-level API para operações que não dependem de project scope
